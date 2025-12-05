@@ -1,0 +1,5 @@
+Flask
+flask-cors
+paho-mqtt
+pysqlite3-binary
+gunicorn
