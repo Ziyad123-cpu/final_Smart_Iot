@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌾 Smart Farming Dashboard (MQTT)</title>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#007bff">
+    <link rel="icon" href="icon-192.png">
+
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+
+    <style>
+        /* 🌦️ Animasi ikon cuaca */
+        .weather-icon {
+            font-size: 48px;
+            display: inline-block;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-8px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        .weather-card {
+            text-align: center;
+            padding: 10px;
+        }
+
+        .weather-card p {
+            margin: 4px 0;
+        }
+
+        /* 💧 Animasi Status Pompa */
+        .pump-status-on {
+            color: #00e676;
+            animation: pulse 1s infinite;
+        }
+
+        .pump-status-off {
+            color: #ff5f56;
+        }
+
+        @keyframes pulse {
+            0% {
+                text-shadow: 0 0 5px #00e676;
+            }
+
+            50% {
+                text-shadow: 0 0 20px #00e676;
+            }
+
+            100% {
+                text-shadow: 0 0 5px #00e676;
+            }
+        }
+
+        /* Tombol kontrol pompa */
+        .controls button {
+            background: #0e2133;
+            color: #00e0b8;
+            border: 2px solid #00e0b8;
+            border-radius: 6px;
+            padding: 6px 12px;
+            margin-right: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .controls button:hover {
+            background: #00e0b8;
+            color: #001a15;
+            transform: scale(1.05);
+        }
+
+        .controls span {
+            color: #9bb0bf;
+            font-size: 0.9rem;
+        }
+
+        /* Style baru untuk Realtime Clock & Greeting */
+        .waktu-greeting {
+            margin-top: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--ok);
+        }
+
+        .waktu-greeting small {
+            color: var(--subtext);
+            font-weight: normal;
+        }
+
+        /* 🧠 Gaya untuk KPI */
+        .kpi-list p {
+            margin: 5px 0;
+            font-size: 1rem;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+            padding-bottom: 5px;
+        }
+
+        .kpi-list span {
+            font-weight: bold;
+            color: var(--ok);
+        }
+
+        .system-features {
+            list-style: disc;
+            margin-left: 20px;
+            padding-left: 0;
+            font-size: 0.9rem;
+            color: var(--subtext);
+        }
+
+        /* ⚠️ Style Peringatan Tanah */
+        .card.alert-low {
+            border: 3px solid var(--danger);
+            box-shadow: 0 0 15px var(--danger);
+        }
+
+        .card.alert-warning {
+            border: 3px solid var(--warning);
+            box-shadow: 0 0 15px var(--warning);
+        }
+
+        :root {
+            --warning: #ffc107;
+        }
+
+        /* Slider */
+        .slider-container {
+            margin-top: 10px;
+        }
+
+        input[type=range] {
+            width: 100%;
+            height: 10px;
+            background: var(--subtext);
+            border-radius: 5px;
+            -webkit-appearance: none;
+            margin: 10px 0;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+        }
+
+        .slider-output {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--ok);
+        }
+
+        /* 🧑‍🌾💧 Animasi Petani */
+        .farm-animation-container {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 3rem;
+            position: relative;
+            height: 70px;
+        }
+
+        .farm-animation-icon {
+            display: inline-block;
+            transition: transform 0.5s ease-out;
+            will-change: transform;
+        }
+
+        .farm-animation-icon.dry-bounce {
+            animation: dryBounce 1s infinite alternate ease-in-out;
+            color: var(--danger);
+        }
+
+        @keyframes dryBounce {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: translateY(-10px) scale(1.05);
+                opacity: 0.8;
+            }
+
+            100% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .farm-animation-icon.watering-flow {
+            animation: wateringFlow 1.5s infinite linear;
+            color: var(--ok);
+        }
+
+        @keyframes wateringFlow {
+            0% {
+                transform: translateX(-10px) rotate(-5deg);
+                opacity: 0.7;
+            }
+
+            50% {
+                transform: translateX(10px) rotate(5deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateX(-10px) rotate(-5deg);
+                opacity: 0.7;
+            }
+        }
+
+        .farm-animation-icon.normal-idle {
+            animation: normalIdle 2s infinite ease-in-out;
+            color: var(--subtext);
+        }
+
+        @keyframes normalIdle {
+            0% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-3px);
+            }
+
+            100% {
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="menu-toggle" id="menuToggle">☰</div>
+        <h1>🌱 Smart Farming Dashboard (MQTT)</h1>
+        <p>Realtime IoT • Suhu • Kelembapan • Kontrol Pompa</p>
+
+        <div class="waktu-greeting">
+            <span id="realtimeGreeting">Selamat Datang</span>
+            <small> | </small>
+            <span id="realtimeClock">--:--:--</span>
+        </div>
+
+        <span id="statusKoneksi" class="status">🔴 Terputus</span>
+
+        <div id="themeSelector">
+            <select id="themeSelect">
+                <option value="dark">🌙 Gelap</option>
+                <option value="light">☀️ Terang</option>
+                <option value="green">🌿 Hijau Alam</option>
+            </select>
+        </div>
+    </header>
+
+    <nav class="sidebar" id="sidebar">
+        <button class="menu-btn" id="btnDashboard">🏠 Dashboard</button>
+        <button class="menu-btn" id="btnDatabase">📊 Database Log</button>
+    </nav>
+
+    <main id="dashboardSection" class="content-section active">
+
+        <section class="grid">
+
+            <div class="card">
+                <h3>📅 Tanggal & Hari</h3>
+                <p id="tanggalHari" class="nilai">--, -- -- ----</p>
+                <small>Update waktu otomatis</small>
+            </div>
+
+            <div class="card weather-card">
+                <h3>🌦 Cuaca Saat Ini</h3>
+                <div id="weatherIcon" class="weather-icon">☁️</div>
+                <p id="weatherCity" class="nilai">--</p>
+                <p id="weatherTemp">-- °C</p>
+                <small id="weatherDesc">Memuat data cuaca...</small>
+            </div>
+
+            <div class="card" id="soilMoistureCard">
+                <h3>🌾 Kelembapan Tanah</h3>
+                <p id="soilMoisture" class="nilai">--%</p>
+                <small>Kedalaman (avg): -- cm</small>
+            </div>
+
+            <div class="card">
+                <h3>🌡 Suhu Tanah</h3>
+                <p id="soilTemp" class="nilai">-- °C</p>
+                <small>Suhu rata-rata zona akar</small>
+            </div>
+
+            <div class="card">
+                <h3>🌬 Suhu Udara</h3>
+                <p id="airTemp" class="nilai">-- °C</p>
+                <small>Sensor atas lapangan</small>
+            </div>
+
+            <div class="card">
+                <h3>💧 Kelembapan Udara</h3>
+                <p id="airHum" class="nilai">--%</p>
+                <small>Microclimate</small>
+            </div>
+
+            <div class="card wide">
+                <h3>💧 Pengaturan Ambang Batas Otomatis</h3>
+
+                <div class="slider-container">
+                    <label>Minimal Kelembaban Tanah untuk Irigasi:</label>
+                    <p class="slider-output">
+                        <span id="thresholdValue">40</span>%
+                    </p>
+
+                    <input type="range" id="moistureThreshold" min="20" max="80" value="40">
+                    <button id="saveThreshold">Simpan Batas Ambang</button>
+
+                    <small>Pompa akan otomatis menyala jika kelembaban di bawah nilai ini.</small>
+                </div>
+            </div>
+
+            <div class="card wide">
+                <h3>🚿 Status Pompa</h3>
+                <p id="pumpStatus" class="nilai pump-status-off">Mati</p>
+
+                <div class="controls">
+                    <button id="nyalakan">Nyalakan</button>
+                    <button id="matikan">Matikan</button>
+                    <span id="mode">Mode: Otomatis</span>
+                </div>
+            </div>
+
+        </section>
+
+        <section class="chart-container">
+            <h3>📈 Tren Sensor (20 menit terakhir)</h3>
+            <canvas id="sensorChart"></canvas>
+        </section>
+
+        <aside class="side-info">
+
+            <div class="card petani">
+                <h3>👨‍🌾 Nama Petani: <span id="namaPetani">Budi</span></h3>
+                <p>Lokasi: Kebun Percobaan • Zona A</p>
+                <p>Aktivitas: Penyiraman berkala</p>
+
+                <div class="farm-animation-container">
+                    <span id="farmStatusAnimation" class="farm-animation-icon"></span>
+                </div>
+
+                <div class="sync-info">
+                    <small>Terakhir Sinkron: <span id="lastSync">--</span></small><br>
+                    <small>Koneksi: <span id="connState">--</span></small>
+                </div>
+            </div>
+
+            <div class="card sistem">
+                <h3>🧠 Ringkasan Sistem (KPI)</h3>
+
+                <div class="kpi-list">
+                    <p>✨ <strong>Keandalan Sistem:</strong> <span id="kpiReliability">--%</span></p>
+                    <p>💧 <strong>Air Tersimpan Harian:</strong> <span id="kpiWaterSaved">-- Liter</span></p>
+                </div>
+
+                <ul class="system-features">
+                    <li>Mode otomatis berdasarkan kelembapan tanah</li>
+                    <li>Kontrol manual tersedia melalui tombol</li>
+                    <li>Data dikirim via MQTT broker</li>
+                </ul>
+
+                <div class="footer-info">
+                    <button id="modeBtn">Ganti Mode</button>
+                    <small>Versi UI • 2.0 (MQTT)</small>
+                </div>
+            </div>
+
+        </aside>
+
+    </main>
+
+    <section id="databaseSection" class="content-section">
+        <div class="card database-card fadeIn">
+            <h2>📊 Log Data Sensor</h2>
+
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Hari</th>
+                        <th>Waktu</th>
+                        <th>Kelembapan Tanah (%)</th>
+                        <th>Suhu Tanah (°C)</th>
+                        <th>Suhu Udara (°C)</th>
+                        <th>Kelembapan Udara (%)</th>
+                        <th>Status Pompa</th>
+                    </tr>
+                </thead>
+
+                <tbody id="dataBody"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+
+    <!-- Tambahan: fungsi load history dari backend /get_history -->
+    <script>
+        async function loadHistory() {
+            try {
+                const res = await fetch('/get_history');
+                const rows = await res.json(); // rows adalah array of arrays dari sqlite (id, tanggal, hari, waktu, moisture, soil_temp, air_temp, air_hum, pump_state)
+                const tbody = document.getElementById('dataBody');
+                tbody.innerHTML = '';
+
+                // rows terurut DESC (terbaru di index 0). Kita tampilkan urut dari terbaru ke lama.
+                rows.forEach(r => {
+                    // Pastikan panjang array sesuai (9 kolom)
+                    const tanggal = r[1] || '-';
+                    const hari = r[2] || '-';
+                    const waktu = r[3] || '-';
+                    const moisture = (r[4] !== null && r[4] !== undefined) ? r[4] : '-';
+                    const soil_temp = (r[5] !== null && r[5] !== undefined) ? r[5] : '-';
+                    const air_temp = (r[6] !== null && r[6] !== undefined) ? r[6] : '-';
+                    const air_hum = (r[7] !== null && r[7] !== undefined) ? r[7] : '-';
+                    const pump = r[8] || '-';
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${tanggal}</td>
+                        <td>${hari}</td>
+                        <td>${waktu}</td>
+                        <td>${moisture}%</td>
+                        <td>${soil_temp}°C</td>
+                        <td>${air_temp}°C</td>
+                        <td>${air_hum}%</td>
+                        <td>${pump}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+            } catch (err) {
+                console.error('❌ Gagal memuat history:', err);
+                // jika gagal, biarkan tabel tetap seperti realtime (script.js sudah handle sebelumnya)
+            }
+        }
+
+        // Panggil loadHistory saat tombol Database ditekan (selain handler yang sudah ada di script.js)
+        document.getElementById('btnDatabase').addEventListener('click', loadHistory);
+    </script>
+
+</body>
+</html>
