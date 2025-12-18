@@ -9,7 +9,6 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007bff">
     <link rel="icon" href="icon-192.png">
-
     <link rel="stylesheet" href="style.css">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -24,27 +23,13 @@
         }
 
         @keyframes float {
-            0% {
-                transform: translateY(0px);
-            }
-
-            50% {
-                transform: translateY(-8px);
-            }
-
-            100% {
-                transform: translateY(0px);
-            }
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+            100% { transform: translateY(0px); }
         }
 
-        .weather-card {
-            text-align: center;
-            padding: 10px;
-        }
-
-        .weather-card p {
-            margin: 4px 0;
-        }
+        .weather-card { text-align: center; padding: 10px; }
+        .weather-card p { margin: 4px 0; }
 
         /* 💧 Animasi Status Pompa */
         .pump-status-on {
@@ -52,22 +37,12 @@
             animation: pulse 1s infinite;
         }
 
-        .pump-status-off {
-            color: #ff5f56;
-        }
+        .pump-status-off { color: #ff5f56; }
 
         @keyframes pulse {
-            0% {
-                text-shadow: 0 0 5px #00e676;
-            }
-
-            50% {
-                text-shadow: 0 0 20px #00e676;
-            }
-
-            100% {
-                text-shadow: 0 0 5px #00e676;
-            }
+            0% { text-shadow: 0 0 5px #00e676; }
+            50% { text-shadow: 0 0 20px #00e676; }
+            100% { text-shadow: 0 0 5px #00e676; }
         }
 
         /* Tombol kontrol pompa */
@@ -89,12 +64,9 @@
             transform: scale(1.05);
         }
 
-        .controls span {
-            color: #9bb0bf;
-            font-size: 0.9rem;
-        }
+        .controls span { color: #9bb0bf; font-size: 0.9rem; }
 
-        /* Style baru untuk Realtime Clock & Greeting */
+        /* Style Realtime Clock & Greeting */
         .waktu-greeting {
             margin-top: 10px;
             font-size: 1.1rem;
@@ -102,12 +74,9 @@
             color: var(--ok);
         }
 
-        .waktu-greeting small {
-            color: var(--subtext);
-            font-weight: normal;
-        }
+        .waktu-greeting small { color: var(--subtext); font-weight: normal; }
 
-        /* 🧠 Gaya untuk KPI */
+        /* 🧠 Gaya KPI */
         .kpi-list p {
             margin: 5px 0;
             font-size: 1rem;
@@ -115,10 +84,7 @@
             padding-bottom: 5px;
         }
 
-        .kpi-list span {
-            font-weight: bold;
-            color: var(--ok);
-        }
+        .kpi-list span { font-weight: bold; color: var(--ok); }
 
         .system-features {
             list-style: disc;
@@ -139,15 +105,10 @@
             box-shadow: 0 0 15px var(--warning);
         }
 
-        :root {
-            --warning: #ffc107;
-        }
+        :root { --warning: #ffc107; }
 
         /* Slider */
-        .slider-container {
-            margin-top: 10px;
-        }
-
+        .slider-container { margin-top: 10px; }
         input[type=range] {
             width: 100%;
             height: 10px;
@@ -166,11 +127,7 @@
             cursor: pointer;
         }
 
-        .slider-output {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: var(--ok);
-        }
+        .slider-output { font-size: 1.2rem; font-weight: bold; color: var(--ok); }
 
         /* 🧑‍🌾💧 Animasi Petani */
         .farm-animation-container {
@@ -193,20 +150,9 @@
         }
 
         @keyframes dryBounce {
-            0% {
-                transform: translateY(0) scale(1);
-                opacity: 1;
-            }
-
-            50% {
-                transform: translateY(-10px) scale(1.05);
-                opacity: 0.8;
-            }
-
-            100% {
-                transform: translateY(0) scale(1);
-                opacity: 1;
-            }
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            50% { transform: translateY(-10px) scale(1.05); opacity: 0.8; }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
         }
 
         .farm-animation-icon.watering-flow {
@@ -215,20 +161,9 @@
         }
 
         @keyframes wateringFlow {
-            0% {
-                transform: translateX(-10px) rotate(-5deg);
-                opacity: 0.7;
-            }
-
-            50% {
-                transform: translateX(10px) rotate(5deg);
-                opacity: 1;
-            }
-
-            100% {
-                transform: translateX(-10px) rotate(-5deg);
-                opacity: 0.7;
-            }
+            0% { transform: translateX(-10px) rotate(-5deg); opacity: 0.7; }
+            50% { transform: translateX(10px) rotate(5deg); opacity: 1; }
+            100% { transform: translateX(-10px) rotate(-5deg); opacity: 0.7; }
         }
 
         .farm-animation-icon.normal-idle {
@@ -237,28 +172,45 @@
         }
 
         @keyframes normalIdle {
-            0% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-3px);
-            }
-
-            100% {
-                transform: translateY(0);
-            }
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+            100% { transform: translateY(0); }
         }
+
+        /* ===== TAMBAHAN RANDOM SCHEDULE (AMAN) ===== */
+        .random-box {
+            border-top: 2px dashed var(--accent);
+            margin-top: 12px;
+            padding-top: 10px;
+        }
+
+        .random-box input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 4px;
+            margin-bottom: 6px;
+        }
+
+        .random-box button {
+            background: #00e0b8;
+            color: #001a15;
+            border: none;
+            padding: 8px;
+            width: 100%;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .random-status { margin-top: 6px; font-weight: bold; color: var(--ok); }
     </style>
 </head>
 
 <body>
-
     <header>
         <div class="menu-toggle" id="menuToggle">☰</div>
         <h1>🌱 Smart IoT Ornamental Plant Watering (MQTT)</h1>
         <p>Realtime IoT • Suhu • Kelembapan • Kontrol Pompa</p>
-
         <div class="logo-container">
             <img src="assets/logo-its.png" alt="Logo ITS" class="logo">
             <img src="assets/logo-instrumentasi.png" alt="Logo Teknik Instrumentasi ITS" class="logo">
@@ -271,9 +223,7 @@
             <small> | </small>
             <span id="realtimeClock">--:--:--</span>
         </div>
-
         <span id="statusKoneksi" class="status">🔴 Terputus</span>
-
         <div id="themeSelector">
             <select id="themeSelect">
                 <option value="dark">🌙 Gelap</option>
@@ -282,13 +232,13 @@
             </select>
         </div>
     </div>
+
     <nav class="sidebar" id="sidebar">
         <button class="menu-btn" id="btnDashboard">🏠 Dashboard</button>
         <button class="menu-btn" id="btnDatabase">📊 Database Log</button>
     </nav>
 
     <main id="dashboardSection" class="content-section active">
-
         <section class="grid">
 
             <div class="card">
@@ -318,31 +268,15 @@
             </div>
 
             <div class="card">
-                <h3>🌬 Suhu Udara</h3>
-                <p id="airTemp" class="nilai">-- °C</p>
+                <h3>🌬 Kelembapan Udara</h3>
+                <p id="airHum" class="nilai">--%</p>
                 <small>Sensor atas lapangan</small>
             </div>
 
             <div class="card">
-                <h3>💧 Kelembapan Udara</h3>
-                <p id="airHum" class="nilai">--%</p>
+                <h3>💧 Suhu Udara</h3>
+                <p id="airTemp" class="nilai">--°C</p>
                 <small>Microclimate</small>
-            </div>
-
-            <div class="card wide">
-                <h3>💧 Pengaturan Ambang Batas Otomatis</h3>
-
-                <div class="slider-container">
-                    <label>Minimal Kelembaban Tanah untuk Irigasi:</label>
-                    <p class="slider-output">
-                        <span id="thresholdValue">40</span>%
-                    </p>
-
-                    <input type="range" id="moistureThreshold" min="20" max="80" value="40">
-                    <button id="saveThreshold">Simpan Batas Ambang</button>
-
-                    <small>Pompa akan otomatis menyala jika kelembaban di bawah nilai ini.</small>
-                </div>
             </div>
 
             <div class="card wide">
@@ -355,28 +289,6 @@
                     <span id="mode">Mode: Otomatis</span>
                 </div>
             </div>
-
-            <div class="card wide">
-                <h3>⏰ Penjadwalan Penyiraman Otomatis</h3>
-
-                <label>Jam Penyiraman:</label>
-                <input type="time" id="scheduleTime" value="10:00" style="width:100%; padding:8px; margin-top:5px;">
-
-                <label style="margin-top:10px; display:block;">Durasi (menit):</label>
-                <input type="number" id="scheduleDuration" value="5" min="1" max="60"
-                    style="width:100%; padding:8px;">
-
-                <button id="saveSchedule" style="margin-top:10px;">💾 Simpan Jadwal</button>
-
-                <small>Pompa akan menyala otomatis sesuai jam yang diatur.</small>
-
-                <p style="margin-top:8px;">
-                    Jadwal Aktif:
-                    <strong><span id="activeSchedule">Belum diatur</span></strong>
-                </p>
-            </div>
-
-        </section>
 
         <section class="chart-container">
             <h3>📈 Tren Sensor (20 menit terakhir)</h3>
@@ -402,7 +314,6 @@
 
             <div class="card sistem">
                 <h3>🧠 Ringkasan Sistem (KPI)</h3>
-
                 <div class="kpi-list">
                     <p>✨ <strong>Keandalan Sistem:</strong> <span id="kpiReliability">--%</span></p>
                     <p>💧 <strong>Air Tersimpan Harian:</strong> <span id="kpiWaterSaved">-- Liter</span></p>
@@ -436,8 +347,8 @@
                         <th>Waktu</th>
                         <th>Kelembapan Tanah (%)</th>
                         <th>Suhu Tanah (°C)</th>
-                        <th>Suhu Udara (°C)</th>
                         <th>Kelembapan Udara (%)</th>
+                        <th>Suhu Udara (°C)</th>
                         <th>Status Pompa</th>
                     </tr>
                 </thead>
@@ -453,13 +364,11 @@
         async function loadHistory() {
             try {
                 const res = await fetch('/get_history');
-                const rows = await res.json(); // rows adalah array of arrays dari sqlite (id, tanggal, hari, waktu, moisture, soil_temp, air_temp, air_hum, pump_state)
+                const rows = await res.json();
                 const tbody = document.getElementById('dataBody');
                 tbody.innerHTML = '';
 
-                // rows terurut DESC (terbaru di index 0). Kita tampilkan urut dari terbaru ke lama.
                 rows.forEach(r => {
-                    // Pastikan panjang array sesuai (9 kolom)
                     const tanggal = r[1] || '-';
                     const hari = r[2] || '-';
                     const waktu = r[3] || '-';
@@ -482,16 +391,206 @@
                     `;
                     tbody.appendChild(row);
                 });
-
             } catch (err) {
                 console.error('❌ Gagal memuat history:', err);
-                // jika gagal, biarkan tabel tetap seperti realtime (script.js sudah handle sebelumnya)
             }
         }
 
-        // Panggil loadHistory saat tombol Database ditekan (selain handler yang sudah ada di script.js)
         document.getElementById('btnDatabase').addEventListener('click', loadHistory);
     </script>
 
+    <script>
+        async function updateModeUI() {
+            try {
+                const res = await fetch('/get_data');
+                const data = await res.json();
+
+                const modeSpan = document.getElementById('mode');
+                const btnOn = document.getElementById('nyalakan');
+                const btnOff = document.getElementById('matikan');
+
+                if (data.mode === "MANUAL") {
+                    modeSpan.innerText = "Mode: Manual";
+                    btnOn.disabled = false;
+                    btnOff.disabled = false;
+                    btnOn.style.opacity = "1";
+                    btnOff.style.opacity = "1";
+                } else {
+                    modeSpan.innerText = "Mode: Otomatis";
+                    btnOn.disabled = true;
+                    btnOff.disabled = true;
+                    btnOn.style.opacity = "0.5";
+                    btnOff.style.opacity = "0.5";
+                }
+            } catch (e) {
+                console.error("Gagal update mode UI:", e);
+            }
+        }
+
+        document.getElementById("modeBtn").addEventListener("click", async () => {
+            try {
+                const res = await fetch('/get_data');
+                const data = await res.json();
+                const newMode = data.mode === "AUTO" ? "MANUAL" : "AUTO";
+                await fetch(`/mode/${newMode}`);
+                updateModeUI();
+            } catch (e) {
+                console.error("Gagal ganti mode:", e);
+            }
+        });
+
+        document.getElementById("nyalakan").addEventListener("click", () => {
+            fetch('/pump/on');
+        });
+
+        document.getElementById("matikan").addEventListener("click", () => {
+            fetch('/pump/off');
+        });
+
+        setInterval(updateModeUI, 2000);
+    </script>
+
+    <script>
+        document.getElementById("saveRandom").addEventListener("click", async () => {
+            const start = document.getElementById("randStart").value.split(":")[0
+            const start = document.getElementById("randStart").value.split(":")[0];
+            const end = document.getElementById("randEnd").value.split(":")[0];
+            const count = parseInt(document.getElementById("randCount").value);
+            const duration = parseInt(document.getElementById("randDuration").value);
+
+            const payload = {
+                startHour: start,
+                endHour: end,
+                countPerDay: count,
+                durationSec: duration
+            };
+
+            try {
+                const res = await fetch('/set_random_schedule', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await res.json();
+                document.getElementById("randomStatus").innerText = result.status || "Aktif";
+            } catch (err) {
+                console.error("❌ Gagal menyimpan jadwal random:", err);
+                document.getElementById("randomStatus").innerText = "Error!";
+            }
+        });
+
+        // ================== Realtime Clock & Greeting ==================
+        function updateClock() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById("tanggalHari").innerText = now.toLocaleDateString('id-ID', options);
+
+            const time = now.toLocaleTimeString('id-ID');
+            document.getElementById("realtimeClock").innerText = time;
+
+            const hours = now.getHours();
+            let greeting = "Selamat Pagi";
+            if (hours >= 12 && hours < 15) greeting = "Selamat Siang";
+            else if (hours >= 15 && hours < 18) greeting = "Selamat Sore";
+            else if (hours >= 18) greeting = "Selamat Malam";
+            document.getElementById("realtimeGreeting").innerText = greeting;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // ================== MQTT Realtime ==================
+        const client = mqtt.connect('wss://test.mosquitto.org:8081/mqtt');
+        client.on('connect', () => {
+            console.log("✅ Terhubung ke MQTT broker");
+            document.getElementById("statusKoneksi").innerText = "🟢 Terhubung";
+            client.subscribe('smartfarm/+/data');
+        });
+
+        client.on('message', (topic, message) => {
+            try {
+                const data = JSON.parse(message.toString());
+                if (data.soilMoisture !== undefined)
+                    document.getElementById("soilMoisture").innerText = data.soilMoisture + "%";
+                if (data.soilTemp !== undefined)
+                    document.getElementById("soilTemp").innerText = data.soilTemp + "°C";
+                if (data.airHum !== undefined)
+                    document.getElementById("airHum").innerText = data.airHum + "%";
+                if (data.airTemp !== undefined)
+                    document.getElementById("airTemp").innerText = data.airTemp + "°C";
+                if (data.pumpStatus !== undefined) {
+                    const pumpEl = document.getElementById("pumpStatus");
+                    pumpEl.innerText = data.pumpStatus ? "Menyala" : "Mati";
+                    pumpEl.className = data.pumpStatus ? "nilai pump-status-on" : "nilai pump-status-off";
+                }
+
+                // Animasi petani
+                const farmIcon = document.getElementById("farmStatusAnimation");
+                if (data.soilMoisture < 30) {
+                    farmIcon.className = "farm-animation-icon dry-bounce";
+                    farmIcon.innerText = "👨‍🌾";
+                } else if (data.pumpStatus) {
+                    farmIcon.className = "farm-animation-icon watering-flow";
+                    farmIcon.innerText = "👨‍🌾💦";
+                } else {
+                    farmIcon.className = "farm-animation-icon normal-idle";
+                    farmIcon.innerText = "👨‍🌾";
+                }
+            } catch (e) {
+                console.error("❌ Error parsing MQTT message:", e);
+            }
+        });
+
+        client.on('error', (err) => {
+            console.error("❌ MQTT Error:", err);
+            document.getElementById("statusKoneksi").innerText = "🔴 Terputus";
+        });
+
+        // ================== Chart.js Sensor Chart ==================
+        const ctx = document.getElementById('sensorChart').getContext('2d');
+        const sensorChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    { label: 'Kelembapan Tanah (%)', data: [], borderColor: '#00e0b8', fill: false },
+                    { label: 'Suhu Tanah (°C)', data: [], borderColor: '#ff9800', fill: false },
+                    { label: 'Kelembapan Udara (%)', data: [], borderColor: '#2196f3', fill: false },
+                    { label: 'Suhu Udara (°C)', data: [], borderColor: '#9c27b0', fill: false }
+                ]
+            },
+            options: {
+                responsive: true,
+                interaction: { mode: 'index', intersect: false },
+                stacked: false,
+                plugins: { legend: { position: 'top' } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        function updateChart(newData) {
+            const timeLabel = new Date().toLocaleTimeString();
+            sensorChart.data.labels.push(timeLabel);
+
+            sensorChart.data.datasets[0].data.push(newData.soilMoisture);
+            sensorChart.data.datasets[1].data.push(newData.soilTemp);
+            sensorChart.data.datasets[2].data.push(newData.airHum);
+            sensorChart.data.datasets[3].data.push(newData.airTemp);
+
+            if (sensorChart.data.labels.length > 20) {
+                sensorChart.data.labels.shift();
+                sensorChart.data.datasets.forEach(ds => ds.data.shift());
+            }
+
+            sensorChart.update();
+        }
+
+        client.on('message', (topic, message) => {
+            try {
+                const data = JSON.parse(message.toString());
+                updateChart(data);
+            } catch { /* ignore */ }
+        });
+    </script>
 </body>
 </html>
