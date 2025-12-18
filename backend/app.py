@@ -1,596 +1,189 @@
-<!DOCTYPE html>
-<html lang="id">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌾 Smart Farming Dashboard (MQTT)</title>
-
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#007bff">
-    <link rel="icon" href="icon-192.png">
-    <link rel="stylesheet" href="style.css">
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-
-    <style>
-        /* 🌦️ Animasi ikon cuaca */
-        .weather-icon {
-            font-size: 48px;
-            display: inline-block;
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-8px); }
-            100% { transform: translateY(0px); }
-        }
-
-        .weather-card { text-align: center; padding: 10px; }
-        .weather-card p { margin: 4px 0; }
-
-        /* 💧 Animasi Status Pompa */
-        .pump-status-on {
-            color: #00e676;
-            animation: pulse 1s infinite;
-        }
-
-        .pump-status-off { color: #ff5f56; }
-
-        @keyframes pulse {
-            0% { text-shadow: 0 0 5px #00e676; }
-            50% { text-shadow: 0 0 20px #00e676; }
-            100% { text-shadow: 0 0 5px #00e676; }
-        }
-
-        /* Tombol kontrol pompa */
-        .controls button {
-            background: #0e2133;
-            color: #00e0b8;
-            border: 2px solid #00e0b8;
-            border-radius: 6px;
-            padding: 6px 12px;
-            margin-right: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .controls button:hover {
-            background: #00e0b8;
-            color: #001a15;
-            transform: scale(1.05);
-        }
-
-        .controls span { color: #9bb0bf; font-size: 0.9rem; }
-
-        /* Style Realtime Clock & Greeting */
-        .waktu-greeting {
-            margin-top: 10px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: var(--ok);
-        }
-
-        .waktu-greeting small { color: var(--subtext); font-weight: normal; }
-
-        /* 🧠 Gaya KPI */
-        .kpi-list p {
-            margin: 5px 0;
-            font-size: 1rem;
-            border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
-            padding-bottom: 5px;
-        }
-
-        .kpi-list span { font-weight: bold; color: var(--ok); }
-
-        .system-features {
-            list-style: disc;
-            margin-left: 20px;
-            padding-left: 0;
-            font-size: 0.9rem;
-            color: var(--subtext);
-        }
-
-        /* ⚠️ Style Peringatan Tanah */
-        .card.alert-low {
-            border: 3px solid var(--danger);
-            box-shadow: 0 0 15px var(--danger);
-        }
-
-        .card.alert-warning {
-            border: 3px solid var(--warning);
-            box-shadow: 0 0 15px var(--warning);
-        }
-
-        :root { --warning: #ffc107; }
-
-        /* Slider */
-        .slider-container { margin-top: 10px; }
-        input[type=range] {
-            width: 100%;
-            height: 10px;
-            background: var(--subtext);
-            border-radius: 5px;
-            -webkit-appearance: none;
-            margin: 10px 0;
-        }
-
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: var(--accent);
-            cursor: pointer;
-        }
-
-        .slider-output { font-size: 1.2rem; font-weight: bold; color: var(--ok); }
-
-        /* 🧑‍🌾💧 Animasi Petani */
-        .farm-animation-container {
-            margin-top: 15px;
-            text-align: center;
-            font-size: 3rem;
-            position: relative;
-            height: 70px;
-        }
-
-        .farm-animation-icon {
-            display: inline-block;
-            transition: transform 0.5s ease-out;
-            will-change: transform;
-        }
-
-        .farm-animation-icon.dry-bounce {
-            animation: dryBounce 1s infinite alternate ease-in-out;
-            color: var(--danger);
-        }
-
-        @keyframes dryBounce {
-            0% { transform: translateY(0) scale(1); opacity: 1; }
-            50% { transform: translateY(-10px) scale(1.05); opacity: 0.8; }
-            100% { transform: translateY(0) scale(1); opacity: 1; }
-        }
-
-        .farm-animation-icon.watering-flow {
-            animation: wateringFlow 1.5s infinite linear;
-            color: var(--ok);
-        }
-
-        @keyframes wateringFlow {
-            0% { transform: translateX(-10px) rotate(-5deg); opacity: 0.7; }
-            50% { transform: translateX(10px) rotate(5deg); opacity: 1; }
-            100% { transform: translateX(-10px) rotate(-5deg); opacity: 0.7; }
-        }
-
-        .farm-animation-icon.normal-idle {
-            animation: normalIdle 2s infinite ease-in-out;
-            color: var(--subtext);
-        }
-
-        @keyframes normalIdle {
-            0% { transform: translateY(0); }
-            50% { transform: translateY(-3px); }
-            100% { transform: translateY(0); }
-        }
-
-        /* ===== TAMBAHAN RANDOM SCHEDULE (AMAN) ===== */
-        .random-box {
-            border-top: 2px dashed var(--accent);
-            margin-top: 12px;
-            padding-top: 10px;
-        }
-
-        .random-box input {
-            width: 100%;
-            padding: 8px;
-            margin-top: 4px;
-            margin-bottom: 6px;
-        }
-
-        .random-box button {
-            background: #00e0b8;
-            color: #001a15;
-            border: none;
-            padding: 8px;
-            width: 100%;
-            font-weight: bold;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
-        .random-status { margin-top: 6px; font-weight: bold; color: var(--ok); }
-    </style>
-</head>
-
-<body>
-    <header>
-        <div class="menu-toggle" id="menuToggle">☰</div>
-        <h1>🌱 Smart IoT Ornamental Plant Watering (MQTT)</h1>
-        <p>Realtime IoT • Suhu • Kelembapan • Kontrol Pompa</p>
-        <div class="logo-container">
-            <img src="assets/logo-its.png" alt="Logo ITS" class="logo">
-            <img src="assets/logo-instrumentasi.png" alt="Logo Teknik Instrumentasi ITS" class="logo">
-        </div>
-    </header>
-
-    <div class="info-bar">
-        <div class="waktu-greeting">
-            <span id="realtimeGreeting">Selamat Datang</span>
-            <small> | </small>
-            <span id="realtimeClock">--:--:--</span>
-        </div>
-        <span id="statusKoneksi" class="status">🔴 Terputus</span>
-        <div id="themeSelector">
-            <select id="themeSelect">
-                <option value="dark">🌙 Gelap</option>
-                <option value="light">☀️ Terang</option>
-                <option value="green">🌿 Hijau Alam</option>
-            </select>
-        </div>
-    </div>
-
-    <nav class="sidebar" id="sidebar">
-        <button class="menu-btn" id="btnDashboard">🏠 Dashboard</button>
-        <button class="menu-btn" id="btnDatabase">📊 Database Log</button>
-    </nav>
-
-    <main id="dashboardSection" class="content-section active">
-        <section class="grid">
-
-            <div class="card">
-                <h3>📅 Tanggal & Hari</h3>
-                <p id="tanggalHari" class="nilai">--, -- -- ----</p>
-                <small>Update waktu otomatis</small>
-            </div>
-
-            <div class="card weather-card">
-                <h3>🌦 Cuaca Saat Ini</h3>
-                <div id="weatherIcon" class="weather-icon">☁️</div>
-                <p id="weatherCity" class="nilai">--</p>
-                <p id="weatherTemp">-- °C</p>
-                <small id="weatherDesc">Memuat data cuaca...</small>
-            </div>
-
-            <div class="card" id="soilMoistureCard">
-                <h3>🌾 Kelembapan Tanah</h3>
-                <p id="soilMoisture" class="nilai">--%</p>
-                <small>Kedalaman (avg): -- cm</small>
-            </div>
-
-            <div class="card">
-                <h3>🌡 Suhu Tanah</h3>
-                <p id="soilTemp" class="nilai">-- °C</p>
-                <small>Suhu rata-rata zona akar</small>
-            </div>
-
-            <div class="card">
-                <h3>🌬 Kelembapan Udara</h3>
-                <p id="airTemp" class="nilai">--°C</p>
-                <small>Sensor atas lapangan</small>
-            </div>
-
-            <div class="card">
-                <h3>💧 Suhu Udara</h3>
-                <p id="airHum" class="nilai">--%</p>
-                <small>Microclimate</small>
-            </div>
-
-            <div class="card wide">
-                <h3>🚿 Status Pompa</h3>
-                <p id="pumpStatus" class="nilai pump-status-off">Mati</p>
-
-                <div class="controls">
-                    <button id="nyalakan">Nyalakan</button>
-                    <button id="matikan">Matikan</button>
-                    <span id="mode">Mode: Otomatis</span>
-                </div>
-            </div>
-
-        <section class="chart-container">
-            <h3>📈 Tren Sensor (20 menit terakhir)</h3>
-            <canvas id="sensorChart"></canvas>
-        </section>
-
-        <aside class="side-info">
-
-            <div class="card petani">
-                <h3>👨‍🌾 Nama User: <span id="namaPetani">Bagus&Ziyad</span></h3>
-                <p>Lokasi: Ruangan • Zona A</p>
-                <p>Aktivitas: Penyiraman berkala</p>
-
-                <div class="farm-animation-container">
-                    <span id="farmStatusAnimation" class="farm-animation-icon"></span>
-                </div>
-
-                <div class="sync-info">
-                    <small>Terakhir Sinkron: <span id="lastSync">--</span></small><br>
-                    <small>Koneksi: <span id="connState">--</span></small>
-                </div>
-            </div>
-
-            <div class="card sistem">
-                <h3>🧠 Ringkasan Sistem (KPI)</h3>
-                <div class="kpi-list">
-                    <p>✨ <strong>Keandalan Sistem:</strong> <span id="kpiReliability">--%</span></p>
-                    <p>💧 <strong>Air Tersimpan Harian:</strong> <span id="kpiWaterSaved">-- Liter</span></p>
-                </div>
-
-                <ul class="system-features">
-                    <li>Mode otomatis berdasarkan kelembapan tanah</li>
-                    <li>Kontrol manual tersedia melalui tombol</li>
-                    <li>Data dikirim via MQTT broker</li>
-                </ul>
-
-                <div class="footer-info">
-                    <button id="modeBtn">Ganti Mode</button>
-                    <small>Versi UI • 2.0 (MQTT)</small>
-                </div>
-            </div>
-
-        </aside>
-
-    </main>
-
-    <section id="databaseSection" class="content-section">
-        <div class="card database-card fadeIn">
-            <h2>📊 Log Data Sensor</h2>
-
-            <table id="dataTable">
-                <thead>
-                    <tr>
-                        <th>Tanggal</th>
-                        <th>Hari</th>
-                        <th>Waktu</th>
-                        <th>Kelembapan Tanah (%)</th>
-                        <th>Suhu Tanah (°C)</th>
-                        <th>Kelembapan Udara (%)</th>
-                        <th>Suhu Udara (°C)</th>
-                        <th>Status Pompa</th>
-                    </tr>
-                </thead>
-
-                <tbody id="dataBody"></tbody>
-            </table>
-        </div>
-    </section>
-
-    <script src="script.js"></script>
-
-    <script>
-        async function loadHistory() {
-            try {
-                const res = await fetch('/get_history');
-                const rows = await res.json();
-                const tbody = document.getElementById('dataBody');
-                tbody.innerHTML = '';
-
-                rows.forEach(r => {
-                    const tanggal = r[1] || '-';
-                    const hari = r[2] || '-';
-                    const waktu = r[3] || '-';
-                    const moisture = (r[4] !== null && r[4] !== undefined) ? r[4] : '-';
-                    const soil_temp = (r[5] !== null && r[5] !== undefined) ? r[5] : '-';
-                    const air_temp = (r[6] !== null && r[6] !== undefined) ? r[6] : '-';
-                    const air_hum = (r[7] !== null && r[7] !== undefined) ? r[7] : '-';
-                    const pump = r[8] || '-';
-
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${tanggal}</td>
-                        <td>${hari}</td>
-                        <td>${waktu}</td>
-                        <td>${moisture}%</td>
-                        <td>${soil_temp}°C</td>
-                        <td>${air_temp}°C</td>
-                        <td>${air_hum}%</td>
-                        <td>${pump}</td>
-                    `;
-                    tbody.appendChild(row);
-                });
-            } catch (err) {
-                console.error('❌ Gagal memuat history:', err);
-            }
-        }
-
-        document.getElementById('btnDatabase').addEventListener('click', loadHistory);
-    </script>
-
-    <script>
-        async function updateModeUI() {
-            try {
-                const res = await fetch('/get_data');
-                const data = await res.json();
-
-                const modeSpan = document.getElementById('mode');
-                const btnOn = document.getElementById('nyalakan');
-                const btnOff = document.getElementById('matikan');
-
-                if (data.mode === "MANUAL") {
-                    modeSpan.innerText = "Mode: Manual";
-                    btnOn.disabled = false;
-                    btnOff.disabled = false;
-                    btnOn.style.opacity = "1";
-                    btnOff.style.opacity = "1";
-                } else {
-                    modeSpan.innerText = "Mode: Otomatis";
-                    btnOn.disabled = true;
-                    btnOff.disabled = true;
-                    btnOn.style.opacity = "0.5";
-                    btnOff.style.opacity = "0.5";
-                }
-            } catch (e) {
-                console.error("Gagal update mode UI:", e);
-            }
-        }
-
-        document.getElementById("modeBtn").addEventListener("click", async () => {
-            try {
-                const res = await fetch('/get_data');
-                const data = await res.json();
-                const newMode = data.mode === "AUTO" ? "MANUAL" : "AUTO";
-                await fetch(`/mode/${newMode}`);
-                updateModeUI();
-            } catch (e) {
-                console.error("Gagal ganti mode:", e);
-            }
-        });
-
-        document.getElementById("nyalakan").addEventListener("click", () => {
-            fetch('/pump/on');
-        });
-
-        document.getElementById("matikan").addEventListener("click", () => {
-            fetch('/pump/off');
-        });
-
-        setInterval(updateModeUI, 2000);
-    </script>
-
-    <script>
-        document.getElementById("saveRandom").addEventListener("click", async () => {
-            const start = document.getElementById("randStart").value.split(":")[0
-            const start = document.getElementById("randStart").value.split(":")[0];
-            const end = document.getElementById("randEnd").value.split(":")[0];
-            const count = parseInt(document.getElementById("randCount").value);
-            const duration = parseInt(document.getElementById("randDuration").value);
-
-            const payload = {
-                startHour: start,
-                endHour: end,
-                countPerDay: count,
-                durationSec: duration
-            };
-
-            try {
-                const res = await fetch('/set_random_schedule', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                const result = await res.json();
-                document.getElementById("randomStatus").innerText = result.status || "Aktif";
-            } catch (err) {
-                console.error("❌ Gagal menyimpan jadwal random:", err);
-                document.getElementById("randomStatus").innerText = "Error!";
-            }
-        });
-
-        // ================== Realtime Clock & Greeting ==================
-        function updateClock() {
-            const now = new Date();
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById("tanggalHari").innerText = now.toLocaleDateString('id-ID', options);
-
-            const time = now.toLocaleTimeString('id-ID');
-            document.getElementById("realtimeClock").innerText = time;
-
-            const hours = now.getHours();
-            let greeting = "Selamat Pagi";
-            if (hours >= 12 && hours < 15) greeting = "Selamat Siang";
-            else if (hours >= 15 && hours < 18) greeting = "Selamat Sore";
-            else if (hours >= 18) greeting = "Selamat Malam";
-            document.getElementById("realtimeGreeting").innerText = greeting;
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
-
-        // ================== MQTT Realtime ==================
-        const client = mqtt.connect('wss://test.mosquitto.org:8081/mqtt');
-        client.on('connect', () => {
-            console.log("✅ Terhubung ke MQTT broker");
-            document.getElementById("statusKoneksi").innerText = "🟢 Terhubung";
-            client.subscribe('smartfarm/+/data');
-        });
-
-        client.on('message', (topic, message) => {
-            try {
-                const data = JSON.parse(message.toString());
-                if (data.soilMoisture !== undefined)
-                    document.getElementById("soilMoisture").innerText = data.soilMoisture + "%";
-                if (data.soilTemp !== undefined)
-                    document.getElementById("soilTemp").innerText = data.soilTemp + "°C";
-                if (data.airHum !== undefined)
-                    document.getElementById("airHum").innerText = data.airHum + "%";
-                if (data.airTemp !== undefined)
-                    document.getElementById("airTemp").innerText = data.airTemp + "°C";
-                if (data.pumpStatus !== undefined) {
-                    const pumpEl = document.getElementById("pumpStatus");
-                    pumpEl.innerText = data.pumpStatus ? "Menyala" : "Mati";
-                    pumpEl.className = data.pumpStatus ? "nilai pump-status-on" : "nilai pump-status-off";
-                }
-
-                // Animasi petani
-                const farmIcon = document.getElementById("farmStatusAnimation");
-                if (data.soilMoisture < 30) {
-                    farmIcon.className = "farm-animation-icon dry-bounce";
-                    farmIcon.innerText = "👨‍🌾";
-                } else if (data.pumpStatus) {
-                    farmIcon.className = "farm-animation-icon watering-flow";
-                    farmIcon.innerText = "👨‍🌾💦";
-                } else {
-                    farmIcon.className = "farm-animation-icon normal-idle";
-                    farmIcon.innerText = "👨‍🌾";
-                }
-            } catch (e) {
-                console.error("❌ Error parsing MQTT message:", e);
-            }
-        });
-
-        client.on('error', (err) => {
-            console.error("❌ MQTT Error:", err);
-            document.getElementById("statusKoneksi").innerText = "🔴 Terputus";
-        });
-
-        // ================== Chart.js Sensor Chart ==================
-        const ctx = document.getElementById('sensorChart').getContext('2d');
-        const sensorChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: [
-                    { label: 'Kelembapan Tanah (%)', data: [], borderColor: '#00e0b8', fill: false },
-                    { label: 'Suhu Tanah (°C)', data: [], borderColor: '#ff9800', fill: false },
-                    { label: 'Kelembapan Udara (%)', data: [], borderColor: '#2196f3', fill: false },
-                    { label: 'Suhu Udara (°C)', data: [], borderColor: '#9c27b0', fill: false }
-                ]
-            },
-            options: {
-                responsive: true,
-                interaction: { mode: 'index', intersect: false },
-                stacked: false,
-                plugins: { legend: { position: 'top' } },
-                scales: { y: { beginAtZero: true } }
-            }
-        });
-
-        function updateChart(newData) {
-            const timeLabel = new Date().toLocaleTimeString();
-            sensorChart.data.labels.push(timeLabel);
-
-            sensorChart.data.datasets[0].data.push(newData.soilMoisture);
-            sensorChart.data.datasets[1].data.push(newData.soilTemp);
-            sensorChart.data.datasets[2].data.push(newData.airHum);
-            sensorChart.data.datasets[3].data.push(newData.airTemp);
-
-            if (sensorChart.data.labels.length > 20) {
-                sensorChart.data.labels.shift();
-                sensorChart.data.datasets.forEach(ds => ds.data.shift());
-            }
-
-            sensorChart.update();
-        }
-
-        client.on('message', (topic, message) => {
-            try {
-                const data = JSON.parse(message.toString());
-                updateChart(data);
-            } catch { /* ignore */ }
-        });
-    </script>
-</body>
-</html>
+import os
+from flask import Flask, send_from_directory, jsonify
+from flask_cors import CORS
+import paho.mqtt.client as mqtt
+import json
+import threading
+import sqlite3
+from datetime import datetime
+
+# ============================================
+#               FLASK SETUP
+# ============================================
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+FRONTEND_DIR = os.path.join(BASE_DIR, "../frontend")
+
+app = Flask(
+    __name__,
+    static_folder=FRONTEND_DIR,
+    static_url_path=""
+)
+CORS(app)
+
+# ============================================
+#               DATABASE SETUP
+# ============================================
+
+DB_PATH = os.path.join(BASE_DIR, "data.db")
+
+def init_db():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    # TABEL UTAMA
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS sensor_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tanggal TEXT,
+            hari TEXT,
+            waktu TEXT,
+            moisture REAL,
+            soil_temp REAL,
+            air_temp REAL,
+            air_hum REAL,
+            pump_state TEXT
+        )
+    """)
+
+    # 🔧 MIGRASI KOLOM MODE (AMAN, TIDAK DUPLIKAT)
+    try:
+        c.execute("ALTER TABLE sensor_log ADD COLUMN mode TEXT DEFAULT 'MANUAL'")
+    except sqlite3.OperationalError:
+        pass  # kolom sudah ada
+
+    conn.commit()
+    conn.close()
+
+init_db()
+
+def insert_data_to_db(data):
+    try:
+        now = datetime.now()
+        conn = sqlite3.connect(DB_PATH, timeout=5)
+        c = conn.cursor()
+
+        c.execute("""
+            INSERT INTO sensor_log
+            (tanggal, hari, waktu, moisture, soil_temp, air_temp, air_hum, pump_state, mode)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            now.strftime("%d-%m-%Y"),
+            now.strftime("%A"),
+            now.strftime("%H:%M:%S"),
+            data.get("moisturePercent", 0),
+            data.get("soilTemperature", 0.0),
+            data.get("suhuUdara", 0.0),
+            data.get("kelembapanUdara", 0.0),
+            data.get("pumpState", "OFF"),
+            data.get("mode", "MANUAL")
+        ))
+
+        conn.commit()
+    except Exception as e:
+        print("SQLite ERROR:", e)
+    finally:
+        conn.close()
+
+# ============================================
+#               MQTT SETUP
+# ============================================
+
+MQTT_BROKER = "broker.hivemq.com"
+MQTT_PORT = 1883
+
+TOPIC_SENSOR = "irigasi/sensor"
+TOPIC_POMPA  = "irigasi/pompa"
+TOPIC_MODE   = "irigasi/mode"
+
+sensor_data = {
+    "moisturePercent": 0,
+    "soilTemperature": 0.0,
+    "suhuUdara": 0.0,
+    "kelembapanUdara": 0.0,
+    "pumpState": "OFF",
+    "mode": "MANUAL",
+    "tanggal": "-",
+    "hari": "-",
+    "waktu": "-"
+}
+
+def on_connect(client, userdata, flags, rc):
+    print("MQTT CONNECTED:", rc)
+    client.subscribe(TOPIC_SENSOR)
+
+def on_message(client, userdata, msg):
+    global sensor_data
+    try:
+        payload = msg.payload.decode().strip()
+        if not payload:
+            return
+
+        data = json.loads(payload)
+
+        if msg.topic == TOPIC_SENSOR:
+            sensor_data.update(data)
+            print("DATA MQTT:", sensor_data)
+            insert_data_to_db(sensor_data)
+
+    except json.JSONDecodeError as e:
+        print("MQTT JSON ERROR:", e)
+    except Exception as e:
+        print("MQTT ERROR:", e)
+
+mqtt_client = mqtt.Client()
+mqtt_client.on_connect = on_connect
+mqtt_client.on_message = on_message
+mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
+
+threading.Thread(target=mqtt_client.loop_forever, daemon=True).start()
+
+# ============================================
+#               FRONTEND ROUTES
+# ============================================
+
+@app.route("/")
+def serve_index():
+    return send_from_directory(FRONTEND_DIR, "index.html")
+
+@app.route("/<path:path>")
+def serve_static_files(path):
+    return send_from_directory(FRONTEND_DIR, path)
+
+# ============================================
+#               API ROUTES
+# ============================================
+
+@app.route("/get_data")
+def get_data():
+    return jsonify(sensor_data)
+
+@app.route("/pump/<action>")
+def pump(action):
+    if sensor_data["mode"] == "MANUAL":
+        if action.lower() == "on":
+            mqtt_client.publish(TOPIC_POMPA, "ON")
+            sensor_data["pumpState"] = "ON"
+        elif action.lower() == "off":
+            mqtt_client.publish(TOPIC_POMPA, "OFF")
+            sensor_data["pumpState"] = "OFF"
+    return jsonify(sensor_data)
+
+@app.route("/mode/<action>")
+def mode(action):
+    if action.lower() == "auto":
+        sensor_data["mode"] = "AUTO"
+        mqtt_client.publish(TOPIC_MODE, "AUTO")
+    elif action.lower() == "manual":
+        sensor_data["mode"] = "MANUAL"
+        mqtt_client.publish(TOPIC_MODE, "MANUAL")
+    return jsonify(sensor_data)
+
+# ============================================
+#               RUN SERVER
+# ============================================
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))
+    print(f"RUNNING on port {port}")
+    app.run(host="0.0.0.0", port=port)
